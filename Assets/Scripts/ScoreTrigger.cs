@@ -7,10 +7,18 @@ public class ScoreTrigger : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (scored) return;
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player")) return;
+
+        // Only score if player is ABOVE the wall center
+        if (other.transform.position.y > transform.parent.position.y)
         {
             scored = true;
             ScoreManager.Instance.AddScore(1);
         }
+    }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player")) scored = false;
     }
 }
