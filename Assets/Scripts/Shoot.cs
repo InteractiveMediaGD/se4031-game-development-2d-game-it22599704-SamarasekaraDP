@@ -2,17 +2,39 @@ using UnityEngine;
 
 public class Shoot : MonoBehaviour
 {
-    public GameObject projectilePrefab;
-    public float shootCooldown = 0.3f;
-    private float lastShootTime = -1f;
+    public GameObject spiritOrbPrefab;
+    public float cooldown = 0.3f;
+    private float timer = 0f;
+
+    [Header("Audio")]
+    public AudioClip shootSound;
+    private AudioSource audioSource;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        timer -= Time.deltaTime;
+        if (Input.GetMouseButtonDown(0) && timer <= 0f)
         {
-            if (Time.time - lastShootTime < shootCooldown) return;
-            lastShootTime = Time.time;
-            Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+            timer = cooldown;
+            FireOrb();
         }
+    }
+
+    void FireOrb()
+    {
+        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0;
+        Vector2 direction = (mouseWorld - transform.position).normalized;
+
+        GameObject orb = Instantiate(spiritOrbPrefab, transform.position, Quaternion.identity);
+        orb.GetComponent<SpiritOrb>().SetDirection(direction);
+
+        if (audioSource != null && shootSound != null)
+            audioSource.PlayOneShot(shootSound);
     }
 }

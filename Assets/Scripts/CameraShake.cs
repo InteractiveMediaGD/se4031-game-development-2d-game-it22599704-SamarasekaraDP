@@ -3,39 +3,27 @@ using System.Collections;
 
 public class CameraShake : MonoBehaviour
 {
-    public static CameraShake Instance;
+    public float shakeDuration = 0.3f;
+    public float shakeMagnitude = 0.15f;
+    private Vector3 originalPos;
 
-    private Vector3 originalPosition;
+    void Start() { originalPos = transform.position; }
 
-    void Awake()
+    public void Shake()
     {
-        Instance = this;
-        originalPosition = transform.localPosition;
+        StopAllCoroutines();
+        StartCoroutine(ShakeRoutine());
     }
 
-    public void Shake(float duration = 0.3f, float magnitude = 0.15f)
-    {
-        StartCoroutine(ShakeCoroutine(duration, magnitude));
-    }
-
-    IEnumerator ShakeCoroutine(float duration, float magnitude)
+    IEnumerator ShakeRoutine()
     {
         float elapsed = 0f;
-
-        while (elapsed < duration)
+        while (elapsed < shakeDuration)
         {
-            float x = Random.Range(-1f, 1f) * magnitude;
-            float y = Random.Range(-1f, 1f) * magnitude;
-
-            transform.localPosition = new Vector3(
-                originalPosition.x + x,
-                originalPosition.y + y,
-                originalPosition.z);
-
+            transform.position = originalPos + (Vector3)Random.insideUnitCircle * shakeMagnitude;
             elapsed += Time.deltaTime;
             yield return null;
         }
-
-        transform.localPosition = originalPosition;
+        transform.position = originalPos;
     }
 }

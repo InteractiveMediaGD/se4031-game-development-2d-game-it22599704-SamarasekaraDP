@@ -2,13 +2,14 @@ using UnityEngine;
 
 public class ObstacleDamage : MonoBehaviour
 {
-    public float damageAmount = 25f;
+    public int damage = 25;
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
-            PlayerHealth.Instance.TakeDamage(damageAmount);
-        }
+        if (!other.CompareTag("Player")) return;
+
+        PlayerHealth ph = other.GetComponent<PlayerHealth>();
+        if (ph != null)
+            ph.TakeDamage(damage);
     }
 }

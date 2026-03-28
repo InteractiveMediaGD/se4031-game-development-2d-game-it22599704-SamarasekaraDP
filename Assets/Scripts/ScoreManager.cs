@@ -3,28 +3,23 @@ using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
-    public static ScoreManager Instance;
-    public TMP_Text scoreText;
+    public static ScoreManager instance;
+    public int score = 0;
+    public TextMeshProUGUI scoreText;
 
-    private int score = 0;
-
-    void Awake() { Instance = this; }
-
-    void Start()
-    {
-        score = 0;
-        UpdateScoreDisplay();
-    }
+    void Awake() { instance = this; }
 
     public void AddScore(int amount)
     {
         score += amount;
-        UpdateScoreDisplay();
-    }
-
-    void UpdateScoreDisplay()
-    {
         if (scoreText != null)
             scoreText.text = "Score: " + score;
+    }
+
+    public void ResetScore()
+    {
+        score = 0;
+        if (scoreText != null)
+            scoreText.text = "Score: 0";
     }
 }

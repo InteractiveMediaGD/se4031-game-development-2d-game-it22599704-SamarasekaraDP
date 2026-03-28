@@ -4,10 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - HealthPack
   - Enemy
-  - Projectile
-  - ScoreTrigger
+  - Obstacle
+  - HealthPack
   - Ground
   layers:
   - Default
@@ -17,11 +16,11 @@ TagManager:
   - Water
   - UI
   - Player
+  - Ground
   - Obstacle
   - Collectible
   - Enemy
   - Projectile
-  - Ground
   - 
   - 
   - 

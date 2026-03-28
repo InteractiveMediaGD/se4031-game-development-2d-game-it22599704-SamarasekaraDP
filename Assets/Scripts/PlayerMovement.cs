@@ -2,55 +2,70 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float jumpForce = 12f;
-    public float topBoundary = 5f;
-    public LayerMask groundLayer;
+    public float moveSpeed = 5f;
+    public float jumpForce = 18f;
+    public float maxSpeed = 10f;
+    public float speedIncreaseRate = 0.02f;
 
     private Rigidbody2D rb;
-    private bool gameOver = false;
     private bool isGrounded = false;
-    private CircleCollider2D col;
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.1f;
+    public LayerMask groundLayer;
+    private bool isDead = false;
+    private Animator anim;
+
+    [Header("Audio")]
+    public AudioClip jumpSound;
+    private AudioSource audioSource;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<CircleCollider2D>();
+        anim = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
     {
-        if (gameOver) return;
+        if (isDead) return;
 
-        // Check if player is standing on ground
-        isGrounded = Physics2D.CircleCast(
-            col.bounds.center,
-            col.radius * 0.9f,
-            Vector2.down,
-            0.1f,
-            groundLayer);
+        // Speed increase over time
+        if (moveSpeed < maxSpeed)
+            moveSpeed += speedIncreaseRate * Time.deltaTime;
 
-        // Jump only when on ground
-        if ((Input.GetKeyDown(KeyCode.Space) ||
-             Input.GetKeyDown(KeyCode.UpArrow)) && isGrounded)
+        // Ground check
+        isGrounded = Physics2D.OverlapCircle(
+            groundCheck.position, groundCheckRadius, groundLayer);
+
+        // Left / Right movement
+        float h = Input.GetAxisRaw("Horizontal");
+        rb.velocity = new Vector2(h * moveSpeed, rb.velocity.y);
+
+        // Flip sprite based on direction
+        if (h > 0.1f) transform.localScale = new Vector3(1, 1, 1);
+        else if (h < -0.1f) transform.localScale = new Vector3(-1, 1, 1);
+
+        // Jump
+        if ((Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space)) && isGrounded)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            if (audioSource != null && jumpSound != null)
+                audioSource.PlayOneShot(jumpSound);
         }
 
-        // Stop going above screen
-        if (transform.position.y > topBoundary)
+        // Drive Animator
+        if (anim != null)
         {
-            rb.velocity = new Vector2(rb.velocity.x, 0);
-            transform.position = new Vector3(
-                transform.position.x, topBoundary, 0);
+            anim.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
+            anim.SetBool("IsGrounded", isGrounded);
         }
     }
 
-    public void SetGameOver()
+    public void SetDead(bool dead)
     {
-        gameOver = true;
-        rb.velocity = Vector2.zero;
-        rb.gravityScale = 0;
+        isDead = dead;
+        if (anim != null) anim.SetFloat("Speed", 0f);
     }
-
-    public bool IsGrounded() { return isGrounded; }
+    public void ResetSpeed() { moveSpeed = 5f; }
 }
